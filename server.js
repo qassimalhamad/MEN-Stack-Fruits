@@ -1,49 +1,52 @@
-require('dotenv').config()
+// Here is where we import modules
+// We begin by loading Express
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 
 // DATABASE
-
 require('./config/database');
 
-const Fruit = require("./models/fruit.js");
+const Fruit = require('./models/fruit.js');
 
 const app = express();
 
-// MiddleWare
-app.use(morgan('dev'))
-
+// MIDDLEWARE
+app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
 
+// ROUTES
 
-// Routes
-
-app.get("/",  (req, res) => {
-    res.send("Hello, Buddy!");
-  });
-
-app.get('/' , (req,res, next )=>{
-    res.render('index.ejs')
-})
+// Landing Page
+app.get('/', (req, res, next) => {
+  res.render('index.ejs');
+});
 
 // Fruits
+app.get('/fruits/new', (req, res, next) => {
+  res.render('fruits/new.ejs');
+});
 
-// GET /fruits/new
-app.get('/fruits/new', (req, res , next) => {
-    res.render('fruits/new.ejs');
-  });
+app.post('/fruits', async (req, res, next) => {
+  // first make sure that the data from the checkbox
+  // is a boolean, by overwriting the req.body.isReadyToEat
+  if (req.body.isReadyToEat === 'on') {
+    req.body.isReadyToEat = true;
+  } else {
+    req.body.isReadyToEat = false;
+  }
 
+  // inser the req body into the database
+  await Fruit.create(req.body);
+  res.redirect('/fruits');
+});
 
-app.post("/fruits", async (req, res) => {
-    if(req.body.isReadyToEat === 'on'){
-        req.body.isReadyToEat = true;
-    }else {
-        req.body.isReadyToEat = false;
-    }
-    await Fruit.create(req.body);
-    res.redirect("/fruits/new");
-  });
+app.get('/fruits', async (req, res, next) => {
+  const fruits = await Fruit.find();
 
-app.listen(3000 , ()=> {
-    console.log('Listening to Port 3000')
-})
+  res.render('fruits/index.ejs', { fruits });
+});
+
+app.listen(3000, () => {
+  console.log('Listening on port 3000');
+});
