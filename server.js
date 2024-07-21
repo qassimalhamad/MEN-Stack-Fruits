@@ -1,8 +1,14 @@
+require('dotenv').config()
+const express = require('express');
+const morgan = require('morgan');
 
-const express = require('express')
-const morgan = require('morgan')
+// DATABASE
+
+require('./config/database');
 
 const app = express();
+
+
 // MiddleWare
 app.use(morgan('dev'))
 

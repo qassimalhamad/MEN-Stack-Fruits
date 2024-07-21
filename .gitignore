@@ -1,2 +1,4 @@
 node_modules
 .env
+
+//mongodb+srv://qalhamad33:QasFCB12@cluster0.b0maqed.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
