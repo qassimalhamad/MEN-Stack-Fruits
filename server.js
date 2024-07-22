@@ -2,6 +2,7 @@
 // We begin by loading Express
 require('dotenv').config();
 const express = require('express');
+const methodOverride = require('method-override');
 const morgan = require('morgan');
 
 // DATABASE
@@ -14,43 +15,31 @@ const app = express();
 // MIDDLEWARE
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: false }));
+app.use(methodOverride('_method'));
+
+// CONTROLLERS
+
+const fruitsCtrl = require("./controllers/fruits");
 
 // ROUTES
 
 // Landing Page
-app.get('/', (req, res, next) => {
-  res.render('index.ejs');
-});
+app.get('/', fruitsCtrl.landingPage);
 
 // Fruits
-app.get('/fruits/new', (req, res, next) => {
-  res.render('fruits/new.ejs');
-});
+app.get('/fruits/new', fruitsCtrl.newFruit);
 
-app.post('/fruits', async (req, res, next) => {
-  // first make sure that the data from the checkbox
-  // is a boolean, by overwriting the req.body.isReadyToEat
-  if (req.body.isReadyToEat === 'on') {
-    req.body.isReadyToEat = true;
-  } else {
-    req.body.isReadyToEat = false;
-  }
+app.post('/fruits', fruitsCtrl.postFruit );
 
-  // inser the req body into the database
-  await Fruit.create(req.body);
-  res.redirect('/fruits');
-});
+app.get('/fruits', fruitsCtrl.index);
 
-app.get('/fruits', async (req, res, next) => {
-  const fruits = await Fruit.find();
+app.get('/fruits/:fruitId', fruitsCtrl.fruitId);
 
-  res.render('fruits/index.ejs', { fruits });
-});
+app.delete('/fruits/:fruitId', fruitsCtrl.deleteFruit);
 
-app.get('/fruits/:fruitId', async (req, res, next) => {
-  const fruit = await Fruit.findById(req.params.fruitId);
-  res.render('fruits/show.ejs', { fruit });
-});
+app.get('/fruits/:fruitId/edit', fruitsCtrl.editFruit);
+
+app.put('/fruits/:fruitId', fruitsCtrl.updateFruit);
 
 app.listen(3000, () => {
   console.log('Listening on port 3000');
